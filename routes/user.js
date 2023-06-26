@@ -32,10 +32,10 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
-  const { firstname, lastname, email, city, language, password } = req.body;
+router.post("/", hashPassword, (req, res) => {
+  const { firstname, lastname, email, city, language, hashedPassword } = req.body;
   dbConnection
-    .query(postOne, [firstname, lastname, email, city, language, password])
+    .query(postOne, [firstname, lastname, email, city, language, hashedPassword])
     .then(([result]) => {
       if (result.insertId != null) {
         res.location(`/${result.insertId}`).sendStatus(201);
