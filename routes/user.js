@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const dbConnection = require("../database");
-const {hashPassword} = require("../auth");
+const { hashPassword } = require("../auth");
 
 // const userPostBodyExemple = {
 //   "firstname": "Nora",
@@ -17,7 +17,7 @@ const findById = "SELECT * FROM users where id = ?";
 const postOne =
   "INSERT INTO users (firstname, lastname, email, city, language, hashedPassword) VALUES(?, ?, ?, ?, ?, ?)";
 const updateOne =
-  "UPDATE users SET firstname = ?, lastname = ?, username = ?, email = ?, age= ? WHERE id = ?";
+  "UPDATE users SET firstname = ?, lastname = ?, email = ?, city= ?, language = ?, hashedPassword = ? WHERE id = ?";
 
 // ROUTE "/"
 router.get("/", (req, res) => {
@@ -33,9 +33,17 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", hashPassword, (req, res) => {
-  const { firstname, lastname, email, city, language, hashedPassword } = req.body;
+  const { firstname, lastname, email, city, language, hashedPassword } =
+    req.body;
   dbConnection
-    .query(postOne, [firstname, lastname, email, city, language, hashedPassword])
+    .query(postOne, [
+      firstname,
+      lastname,
+      email,
+      city,
+      language,
+      hashedPassword,
+    ])
     .then(([result]) => {
       if (result.insertId != null) {
         res.location(`/${result.insertId}`).sendStatus(201);
@@ -66,24 +74,30 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", hashPassword, (req, res) => {
   const id = parseInt(req.params.id);
-  const { firstname, lastname, username, email, age } = req.body;
-  dbConnection.query(
-    updateOne,
-    [firstname, lastname, username, email, age, id],
-    (err, result, fields) => {
-      if (!err) {
-        if (result.affectedRows === 0) {
-          res.status(404).send("Not Found");
-        } else {
-          res.sendStatus(204);
-        }
+  const { firstname, lastname, email, city, language, hashedPassword } = req.body;
+  dbConnection
+    .query(updateOne, [
+      firstname,
+      lastname,
+      email,
+      city,
+      language,
+      hashedPassword,
+      id
+    ])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
       } else {
-        res.status(500).send("Error editing the user");
+        res.sendStatus(204);
       }
-    }
-  );
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
 });
 
 // const getUserById = (req, res) => {
