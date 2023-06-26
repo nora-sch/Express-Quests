@@ -16,16 +16,19 @@ app.get("/", welcome);
 const movieHandlers = require("./handlers/movieHandlers");
 const userHandlers = require("./handlers/userHandlers");
 
-
+//routes publiques
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
-app.post("/api/movies", verifyToken, movieHandlers.postMovie);
-app.use("/api/users", userRouter);
 app.post(
   "/api/login",
   userHandlers.getUserByEmailWithPasswordAndPassToNext,
   verifyPassword
 );
+//routes privées
+app.use(verifyToken); // verifyToken sera utilisé pout tt les routes qui suivent cette ligne
+app.post("/api/movies", movieHandlers.postMovie);
+app.use("/api/users", userRouter);
+
 
 app.listen(port, (err) => {
   if (err) {
