@@ -1,8 +1,10 @@
 const express = require("express");
 require("dotenv").config();
+const userRouter = require("./routes/user");
+
 
 const app = express();
-
+app.use(express.json());
 const port = 5000;
 
 const welcome = (req, res) => {
@@ -15,6 +17,7 @@ const movieHandlers = require("./movieHandlers");
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
+app.use("/api/users", userRouter);
 
 app.listen(port, (err) => {
   if (err) {
