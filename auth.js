@@ -43,7 +43,24 @@ const verifyPassword = (req, res) => {
       res.sendStatus(500);
     });
 };
+
+const verifyToken = (req, res, next) => {
+
+  try {
+
+    next();
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.sendStatus(401);
+
+  }
+
+};
 module.exports = {
   hashPassword,
   verifyPassword,
+  verifyToken
 };

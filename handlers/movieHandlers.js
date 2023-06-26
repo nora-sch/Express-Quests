@@ -42,7 +42,6 @@ const movies = [
 //   }
 // };
 
-
 const getMovies = (req, res) => {
   database
     .query("select * from movies")
@@ -72,8 +71,36 @@ const getMovieById = (req, res) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
+const postOne =
+  "INSERT INTO movies (title, director, year, color, duration) VALUES(?, ?, ?, ?, ?)";
+
+const postMovie = (req, res) => {
+  // {
+  //   "title": "Titanic", 
+  //   "director": "Cameron", 
+  //   "year" : 1999, 
+  //   "color":true, 
+  //   "duration": 255
+  //   }
+  const { title, director, year, color, duration } = req.body;
+  database
+    .query(postOne, [title, director, year, color, duration])
+    .then(([result]) => {
+      console.log(result.insertId);
+      if (result.insertId != null) {
+        res.location(`/${result.insertId}`).sendStatus(201);
+      } else {
+        res.status(404).send("Not Found");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(`Error retrieving data from database - ${err}`);
+    });
+};
 
 module.exports = {
   getMovies,
   getMovieById,
+  postMovie
 };
