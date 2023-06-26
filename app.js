@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const userRouter = require("./routes/user");
-
+const { verifyPassword } = require("./auth");
 
 const app = express();
 app.use(express.json());
@@ -14,10 +14,17 @@ const welcome = (req, res) => {
 app.get("/", welcome);
 
 const movieHandlers = require("./handlers/movieHandlers");
+const userHandlers = require("./handlers/userHandlers");
+
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.use("/api/users", userRouter);
+app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 
 app.listen(port, (err) => {
   if (err) {
