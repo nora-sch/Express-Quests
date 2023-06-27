@@ -26,10 +26,10 @@ app.post(
 );
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUserById);
+app.post("/api/users", hashPassword, userHandlers.postUser);
 
 //routes privées
 app.use(verifyToken); // verifyToken sera utilisé pout tt les routes qui suivent cette ligne
-app.post("/api/users", hashPassword, userHandlers.postUser);
 app.put("/api/users/:id", hashPassword, userHandlers.modifyUser);
 app.delete("/api/users/:id", userHandlers.deleteUser);
 app.post("/api/movies", movieHandlers.postMovie);
