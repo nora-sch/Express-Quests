@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const userRouter = require("./routes/user");
-const { verifyPassword, verifyToken} = require("./auth");
+const { verifyPassword, verifyToken, hashPassword } = require("./auth");
 
 const app = express();
 app.use(express.json());
@@ -24,11 +24,15 @@ app.post(
   userHandlers.getUserByEmailWithPasswordAndPassToNext,
   verifyPassword
 );
+app.get("/api/users", userHandlers.getUsers);
+app.get("/api/users/:id", userHandlers.getUserById);
+
 //routes privées
 app.use(verifyToken); // verifyToken sera utilisé pout tt les routes qui suivent cette ligne
+app.post("/api/users", hashPassword, userHandlers.postUser);
+app.put("/api/users/:id", hashPassword, userHandlers.modifyUser);
+app.delete("/api/users/:id", userHandlers.deleteUser);
 app.post("/api/movies", movieHandlers.postMovie);
-app.use("/api/users", userRouter);
-
 
 app.listen(port, (err) => {
   if (err) {

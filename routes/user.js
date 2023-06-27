@@ -15,7 +15,6 @@ const userHandlers = require("../handlers/userHandlers");
 // ROUTE "/"
 router.get("/", userHandlers.getUsers);
 router.post("/", hashPassword, userHandlers.postUser);
-
 // ROUTE "/:id"
 router.get("/:id", userHandlers.getUserById);
 router.put("/:id", hashPassword, userHandlers.modifyUser);

@@ -7,8 +7,8 @@ const updateOne =
 const findById =
   "SELECT firstname, lastname, email, city, language FROM users where id = ?";
 const findByEmailWithPwd =
-  "SELECT firstname, lastname, email, city, language, hashedPassword FROM users where email = ?";
-
+  "SELECT id, firstname, lastname, email, city, language, hashedPassword FROM users where email = ?";
+const deleteOne = "DELETE from users WHERE id = ?"
 const getUsers = (req, res) => {
   dbConnection
     .query(findAll)
@@ -60,34 +60,6 @@ const getUserById = (req, res) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
-
-const modifyUser = (req, res) => {
-  const id = parseInt(req.params.id);
-  const { firstname, lastname, email, city, language, hashedPassword } =
-    req.body;
-  dbConnection
-    .query(updateOne, [
-      firstname,
-      lastname,
-      email,
-      city,
-      language,
-      hashedPassword,
-      id,
-    ])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send("Not Found");
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error retrieving data from database");
-    });
-};
-
 const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
   // {
   //   "email": "norah@inbox.lv",
@@ -96,7 +68,7 @@ const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
   dbConnection
     .query(findByEmailWithPwd, [req.body.email])
     .then(([users]) => {
-         if (users[0] != null) {
+      if (users[0] != null) {
         req.user = users[0];
       } else {
         res.status(404).send("Not Found");
@@ -108,10 +80,64 @@ const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
+
+//auth route
+const modifyUser = (req, res) => {
+  if (parseInt(req.tokenUserId) !== parseInt(req.params.id)) {
+    res.status(403).send("Forbidden");
+  } else {
+    const id = parseInt(req.params.id);
+    const { firstname, lastname, email, city, language, hashedPassword } =
+      req.body;
+    dbConnection
+      .query(updateOne, [
+        firstname,
+        lastname,
+        email,
+        city,
+        language,
+        hashedPassword,
+        id,
+      ])
+      .then(([result]) => {
+        if (result.affectedRows === 0) {
+          res.status(404).send("Not Found");
+        } else {
+          res.status(202).json({ message: `User ${firstname} modified` });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error retrieving data from database");
+      });
+  }
+};
+const deleteUser = (req, res) => {
+  if (parseInt(req.tokenUserId) !== parseInt(req.params.id)) {
+    res.status(403).send("Forbidden");
+  } else {
+    const id = parseInt(req.params.id);
+    dbConnection
+      .query(deleteOne, [id])
+      .then(([result]) => {
+        if (result.affectedRows === 0) {
+          res.status(404).send("Not Found");
+        } else {
+          res.status(202).json({ message: `User account deleted` });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error retrieving data from database");
+      });
+  }
+};
+
 module.exports = {
   getUsers,
   postUser,
   getUserById,
   modifyUser,
   getUserByEmailWithPasswordAndPassToNext,
+  deleteUser
 };
